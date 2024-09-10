@@ -31,19 +31,29 @@ CLASS zcl_perf_trace DEFINITION
 
     CONSTANTS:
       BEGIN OF gc_steps,
-        process_payload       TYPE char50 VALUE 'PROCESS_PAYLOAD',
-        validation_logic      TYPE char50 VALUE 'VALIDATION_LOGIC',
-        processing_logic      TYPE char50 VALUE 'PROCESSING_LOGIC',
-        call_order_create_api TYPE char50 VALUE 'CALL_ORDER_CREATE_API',
-        before_save           TYPE char50 VALUE 'BEFORE_SAVE',
-        execute_distribution  TYPE char50 VALUE 'EXECUTE_DISTRIBUTION',
-        create_item_plan      TYPE char50 VALUE 'CREATE_ITEM_PLAN',
-        process_item_do       TYPE char50 VALUE 'PROCESS_ITEM_DO',
-        do_business_partner   TYPE char50 VALUE 'DO_BUSINESS_PARTNER',
-        do_contract_account   TYPE char50 VALUE 'DO_CONTRACT_ACCOUNT',
-        do_provider_contract  TYPE char50 VALUE 'DO_PROVIDER_CONTRACT',
-        do_pc_status_update   TYPE char50 VALUE 'DO_PC_STATUS_UPDATE',
-        do_msg_upd            TYPE char50 VALUE 'DO_MSG_UPD',
+        process_payload               TYPE char50 VALUE 'PROCESS_PAYLOAD',
+        validate_sku                  TYPE char50 VALUE 'VALIDATE_SKU',
+        validate_data                 TYPE char50 VALUE 'VALIDATE_DATA',
+        update_cust_db                TYPE char50 VALUE 'UPDATE_CUSTOM_DB',
+        validate_amendment_payload_ts TYPE char50 VALUE 'VALIDATE_AMENDMENT_PAYLOAD_TS',
+        create_change_order_ts        TYPE char50 VALUE 'CREATE_CHANGE_ORDER_TS',
+        amendment_operation_ts        TYPE char50 VALUE 'AMENDMENT_OPERATION_TS',
+        create_change_order_ref_ts    TYPE char50 VALUE 'CREATE_CHANGE_ORDER_REF_TS',
+        subscritpion_order_creation   TYPE char50 VALUE 'SUBSCRITPION_ORDER_CREATION',
+        bundle_major_to_minorlines    TYPE char50 VALUE 'BUNDLE_MAJOR_TO_MINORLINES',
+        order_create_amend_add_lines  TYPE char50 VALUE 'ORDER_CREATE_AMEND_ADD_LINES',
+        call_meth_subcord             TYPE char50 VALUE 'CALL_METH_SUBCORD',
+        processing_logic              TYPE char50 VALUE 'PROCESSING_LOGIC',
+        call_order_create_api         TYPE char50 VALUE 'CALL_ORDER_CREATE_API',
+        before_save                   TYPE char50 VALUE 'BEFORE_SAVE',
+        execute_distribution          TYPE char50 VALUE 'EXECUTE_DISTRIBUTION',
+        create_item_plan              TYPE char50 VALUE 'CREATE_ITEM_PLAN',
+        process_item_do               TYPE char50 VALUE 'PROCESS_ITEM_DO',
+        do_business_partner           TYPE char50 VALUE 'DO_BUSINESS_PARTNER',
+        do_contract_account           TYPE char50 VALUE 'DO_CONTRACT_ACCOUNT',
+        do_provider_contract          TYPE char50 VALUE 'DO_PROVIDER_CONTRACT',
+        do_pc_status_update           TYPE char50 VALUE 'DO_PC_STATUS_UPDATE',
+        do_msg_upd                    TYPE char50 VALUE 'DO_MSG_UPD',
       END OF gc_steps.
 
 
@@ -104,7 +114,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_perf_trace IMPLEMENTATION.
+CLASS ZCL_PERF_TRACE IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -369,11 +379,11 @@ CLASS zcl_perf_trace IMPLEMENTATION.
 
   ENDMETHOD.
 
+
   METHOD set_item_data.
 
     gv_contract_id = iv_contract_id.
     gv_int_obj_no = iv_int_obj_no.
 
   ENDMETHOD.
-
 ENDCLASS.

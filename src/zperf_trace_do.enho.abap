@@ -48,13 +48,13 @@ CLASS lcl_zperf_trace_do IMPLEMENTATION.
 
         IF lo_instance IS BOUND.
           zcl_perf_trace=>get_instance( )->step_start(
-            iv_step_name = zcl_perf_trace=>gc_steps-execute_distribution
-            iv_xml_data  = lo_instance->ms_exec_plan-header-xml
+            iv_step_id     = 200
+            iv_step_name   = zcl_perf_trace=>gc_steps-execute_distribution
+            iv_xml_data    = lo_instance->ms_exec_plan-header-xml
             iv_header_step = abap_true
-            iv_mainprog  =  sy-repid  ).
+            iv_mainprog    =  sy-repid  ).
         ENDIF.
       ENDIF.
-
     ENDIF.
 
   ENDMETHOD.
@@ -105,7 +105,6 @@ CLASS lcl_zperf_trace_do IMPLEMENTATION.
 *"------------------------------------------------------------------------*
 
     zcl_perf_trace=>get_instance( )->step_end( zcl_perf_trace=>gc_steps-process_item_do ).
-*    zcl_perf_trace=>get_instance( )->save( ).
 
   ENDMETHOD.
 ENDCLASS.
