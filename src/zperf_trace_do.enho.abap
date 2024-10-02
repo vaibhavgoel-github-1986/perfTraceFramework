@@ -48,7 +48,7 @@ CLASS lcl_zperf_trace_do IMPLEMENTATION.
 
         IF lo_instance IS BOUND.
           zcl_perf_trace=>get_instance( )->step_start(
-            iv_step_id     = 200
+            iv_step_id     = zcl_perf_trace=>gc_stepids-execute_distribution " 200
             iv_step_name   = zcl_perf_trace=>gc_steps-execute_distribution
             iv_xml_data    = lo_instance->ms_exec_plan-header-xml
             iv_header_step = abap_true

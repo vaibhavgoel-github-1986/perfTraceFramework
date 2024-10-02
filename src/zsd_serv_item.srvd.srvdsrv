@@ -1,0 +1,4 @@
+@EndUserText.label: 'Subs Item Data'
+define service ZSD_SERV_ITEM {
+  expose ZCDS_C_SERV_ITEM as ServItems;
+}

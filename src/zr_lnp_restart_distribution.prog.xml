@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZR_REFRESH_TRACE_DB</NAME>
+    <NAME>ZR_LNP_RESTART_DISTRIBUTION</NAME>
     <SUBC>1</SUBC>
     <RLOAD>E</RLOAD>
     <FIXPT>X</FIXPT>
@@ -12,12 +12,12 @@
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>Refresh Trace DB</ENTRY>
-     <LENGTH>16</LENGTH>
+     <ENTRY>Restart Distribution</ENTRY>
+     <LENGTH>20</LENGTH>
     </item>
     <item>
      <ID>S</ID>
-     <KEY>SO_SUBS</KEY>
+     <KEY>S_SUBS</KEY>
      <ENTRY>.</ENTRY>
      <LENGTH>9</LENGTH>
      <SPLIT>D</SPLIT>

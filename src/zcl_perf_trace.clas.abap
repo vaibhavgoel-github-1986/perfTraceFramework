@@ -54,8 +54,49 @@ CLASS zcl_perf_trace DEFINITION
         do_provider_contract          TYPE char50 VALUE 'DO_PROVIDER_CONTRACT',
         do_pc_status_update           TYPE char50 VALUE 'DO_PC_STATUS_UPDATE',
         do_msg_upd                    TYPE char50 VALUE 'DO_MSG_UPD',
-      END OF gc_steps.
+        i014_activation_response_outb TYPE char50 VALUE 'I014_ACTIVATION_RESPONSE_OUTB',
+        initial_check_and_fetch_copy  TYPE char50 VALUE 'INITIAL_CHECK_AND_FETCH_COPY',
+        fetch_response_ts             TYPE char50 VALUE 'FETCH_RESPONSE_TS',
+        send_response_ts              TYPE char50 VALUE 'SEND_RESPONSE_TS',
+        i003b_tsv_snapshot_outb       TYPE char50 VALUE 'I003B_TSV_SNAPSHOT_OUTB',
+        fetch_details_mlb_ts          TYPE char50 VALUE 'FETCH_DETAILS_MLB_TS',
+        fetch_details_ts              TYPE char50 VALUE 'FETCH_DETAILS_TS',
+        send_snapshot_ts              TYPE char50 VALUE 'SEND_SNAPSHOT_TS',
+        i012_usage_response_outb      TYPE char50 VALUE 'I012_USAGE_RESPONSE_OUTB',
+        fetch_usage_data_ts           TYPE char50 VALUE 'FETCH_USAGE_DATA_TS',
+        send_usage_data_ts            TYPE char50 VALUE 'SEND_USAGE_DATA_TS',
+        i031_response_outb            TYPE char50 VALUE 'I031_RESPONSE_OUTB',
+        fetch_notification_response   TYPE char50 VALUE 'FETCH_NOTIFICATION_RESPONSE',
+        send_notification_response    TYPE char50 VALUE 'SEND_NOTIFICATION_RESPONSE',
+        i039_response_outb            TYPE char50 VALUE 'I039_RESPONSE_OUTB',
+        fetch_i039_response           TYPE char50 VALUE 'FETCH_I039_RESPONSE',
+        send_i039_response            TYPE char50 VALUE 'SEND_I039_RESPONSE',
+        e013_generate_tf_bits         TYPE char50 VALUE 'E013_GENERATE_TF_BITS',
+        fetch_retro_billable_bits     TYPE char50 VALUE 'FETCH_RETRO_BILLABLE_BITS',
+        i003c_getsub_api              TYPE char50 VALUE 'I003C_GETSUB_API',
+        i003c_getsub_webord_api       TYPE char50 VALUE 'I003C_GETSUB_WEBORD_API',
+        i005_stop_billing             TYPE char50 VALUE 'I005_STOP_BILLING',
+        i005_bill_push                TYPE char50 VALUE 'I005_BILL_PUSH',
+        i005_fetch_details_ts         TYPE char50 VALUE 'I005_FETCH_DETAILS_TS',
+        i005_send_cinv                TYPE char50 VALUE 'I005_SEND_CINV',
+        bit_creation_process          TYPE char50 VALUE 'BIT_CREATION_PROCESS',
+      END OF gc_steps,
 
+      BEGIN OF gc_stepids,
+        process_payload               TYPE int2   VALUE 100,
+        execute_distribution          TYPE int2   VALUE 200,
+        i014_outbound                 TYPE int2   VALUE 300,
+        i012_outbound                 TYPE int2   VALUE 310,
+        i003b_outbound                TYPE int2   VALUE 320,
+        i031_outbound                 TYPE int2   VALUE 330,
+        e013_generate_tf_bits         TYPE int2   VALUE 340,
+        i039_outbound                 TYPE int2   VALUE 350,
+        bit_creation_process          TYPE int2   VALUE 500,
+        i005_stopbill                 TYPE int2   VALUE 360,
+        i005_billpush                 TYPE int2   VALUE 370,
+        i003c_getsub_api              TYPE int2   VALUE 400,
+        i003c_getsub_webord_api       TYPE int2   VALUE 410,
+      END OF gc_stepids.
 
     CLASS-METHODS:
       get_instance
@@ -105,7 +146,6 @@ CLASS zcl_perf_trace DEFINITION
 
     METHODS:
       save.
-
   PROTECTED SECTION.
 
   PRIVATE SECTION.
@@ -270,47 +310,49 @@ CLASS ZCL_PERF_TRACE IMPLEMENTATION.
 
     ASSIGN gt_perf_trace[ lv_count ]
      TO FIELD-SYMBOL(<ls_perf_trace>).
-    IF <ls_perf_trace>-step_name NE iv_step_name. "Step Name is not matching with the Open Step
+    IF <ls_perf_trace> IS ASSIGNED.
+      IF <ls_perf_trace>-step_name NE iv_step_name. "Step Name is not matching with the Open Step
 
-*-   Check for Duplicate Step Names (same steps are being called repeatedly)
-      DATA(lt_dedup_check) = gt_perf_trace.
-      SORT lt_dedup_check BY step_name.
-      DELETE ADJACENT DUPLICATES FROM lt_dedup_check COMPARING step_name.
-      IF lines( lt_dedup_check ) NE lines( gt_perf_trace ).  "If duplicate was found i.e. this step was called in the above call stack
-        DATA(lv_index) = lines( gt_perf_trace ).
+*-     Check for Duplicate Step Names (same steps are being called repeatedly)
+        DATA(lt_dedup_check) = gt_perf_trace.
+        SORT lt_dedup_check BY step_name.
+        DELETE ADJACENT DUPLICATES FROM lt_dedup_check COMPARING step_name.
+        IF lines( lt_dedup_check ) NE lines( gt_perf_trace ).  "If duplicate was found i.e. this step was called in the above call stack
+          DATA(lv_index) = lines( gt_perf_trace ).
 
-        WHILE lv_index > 1.
+          WHILE lv_index > 1.
 
-          SUBTRACT 1 FROM lv_index.
+            SUBTRACT 1 FROM lv_index.
 
-          IF lv_index = 0.
-            EXIT.
-          ENDIF.
+            IF lv_index = 0.
+              EXIT.
+            ENDIF.
 
-          IF gt_perf_trace[ lv_index ]-step_name = iv_step_name.
-            ASSIGN gt_perf_trace[ lv_index ] TO <ls_perf_trace>.
-            EXIT.
-          ENDIF.
+            IF gt_perf_trace[ lv_index ]-step_name = iv_step_name.
+              ASSIGN gt_perf_trace[ lv_index ] TO <ls_perf_trace>.
+              EXIT.
+            ENDIF.
 
-        ENDWHILE.
+          ENDWHILE.
 
-      ELSE.  "If not duplicate, go ahead with normal search
+        ELSE.  "If not duplicate, go ahead with normal search
 
 *-       Search by Full Data Set
-        READ TABLE gt_perf_trace
-         ASSIGNING <ls_perf_trace>
-         WITH KEY subs_ref_id   = gv_subs_ref_id
-                  web_order_num = gv_web_order_num
-                  step_name = iv_step_name
-                  contract_id = gv_contract_id
-                  int_obj_no = gv_int_obj_no.
-        IF sy-subrc IS NOT INITIAL.
-*-       Search by Keys only
           READ TABLE gt_perf_trace
            ASSIGNING <ls_perf_trace>
            WITH KEY subs_ref_id   = gv_subs_ref_id
                     web_order_num = gv_web_order_num
-                    step_name = iv_step_name.
+                    step_name = iv_step_name
+                    contract_id = gv_contract_id
+                    int_obj_no = gv_int_obj_no.
+          IF sy-subrc IS NOT INITIAL.
+*-         Search by Keys only
+            READ TABLE gt_perf_trace
+             ASSIGNING <ls_perf_trace>
+             WITH KEY subs_ref_id   = gv_subs_ref_id
+                      web_order_num = gv_web_order_num
+                      step_name = iv_step_name.
+          ENDIF.
         ENDIF.
       ENDIF.
     ENDIF.
@@ -350,6 +392,10 @@ CLASS ZCL_PERF_TRACE IMPLEMENTATION.
 
       ENDWHILE.
 
+*-   Populating Change Logs
+      <ls_perf_trace>-logged_on = sy-datum.
+      <ls_perf_trace>-logged_at = sy-uzeit.
+
     ENDIF.
 
   ENDMETHOD.
@@ -360,21 +406,25 @@ CLASS ZCL_PERF_TRACE IMPLEMENTATION.
     CHECK gv_trace_active EQ abap_true.
 
     IF gt_perf_trace IS NOT INITIAL.
-      INSERT zdt_perf_trace FROM TABLE gt_perf_trace.
-      IF sy-subrc IS INITIAL.
-        MESSAGE 'Trace Log Inserted' TYPE 'S'.
+      TRY.
+          INSERT zdt_perf_trace FROM TABLE gt_perf_trace.
+          IF sy-subrc IS INITIAL.
+            MESSAGE 'Trace Log Inserted' TYPE 'S'.
 
-        CLEAR:
-         go_instance,
-         gv_trace_active,
-         gv_subs_ref_id,
-         gv_web_order_num,
-         gv_contract_id,
-         gv_int_obj_no,
-         gt_perf_trace,
-         gv_step_id.
+            CLEAR:
+             go_instance,
+             gv_trace_active,
+             gv_subs_ref_id,
+             gv_web_order_num,
+             gv_contract_id,
+             gv_int_obj_no,
+             gt_perf_trace,
+             gv_step_id.
 
-      ENDIF.
+          ENDIF.
+        CATCH cx_sy_open_sql_db.
+          MESSAGE 'Exception was caught during Log Insert' TYPE 'I'.
+      ENDTRY.
     ENDIF.
 
   ENDMETHOD.
